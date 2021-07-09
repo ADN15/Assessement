@@ -11,6 +11,7 @@ import com.example.movie.service.FlickrApplicationService;
 
 import com.example.movie.dto.GlobalResponseDTO;
 import com.example.movie.dto.RequestDTO;
+import com.example.movie.model.PhotoDetail;
 import com.example.movie.exception.GlobalCustomException;
 
 @RestController
@@ -22,15 +23,28 @@ public class FlickrApplicationController {
 	@Autowired
 	FlickrApplicationService flickrApplicationService;
 	
-	@GetMapping("/search")
-	public ResponseEntity<Object> search(@RequestParam("search") String search,@RequestParam("user_id") String userId) throws GlobalCustomException {
-		LOGGER.info("Get List Photo");
+	@PostMapping("/searchDb")
+	public ResponseEntity<Object> searchDB(@RequestBody RequestDTO params) throws GlobalCustomException {
+		LOGGER.info("Get List Photo on Database");
+		PhotoDetail response = flickrApplicationService.getDataLocal(params);
+		int status = 0;
+		String message = "Not Found !";
+		if(response.getPhotoId() != null) {
+			status = 1;
+			message = "OK";
+		}
+		return ResponseEntity.ok(new GlobalResponseDTO<>(status, message, response));
+	}
+	
+	@GetMapping("/searchOnline")
+	public ResponseEntity<Object> searchOnline(@RequestParam("search") String search,@RequestParam("user_id") String userId) throws GlobalCustomException {
+		LOGGER.info("Get List Photo on Account Flickr");
 		
 		RequestDTO params = new RequestDTO();
 		params.setSearch(search);
 		params.setUserId(userId);
 		
-		Map<String,Object> response = flickrApplicationService.getList(params);
+		Map<String,Object> response = flickrApplicationService.getDataFlickr(params);
 		int status = 0;
 		String message = "Not Found !";
 		if (response.get("stat").equals("ok")) {
@@ -42,7 +56,7 @@ public class FlickrApplicationController {
 	}
 	
 	@GetMapping("/getallphoto")
-	public ResponseEntity<Object> listPhoto(@RequestParam("user_id") String userId) throws GlobalCustomException {
+	public ResponseEntity<Object> getAllPhoto(@RequestParam("user_id") String userId) throws GlobalCustomException {
 		LOGGER.info("Get List Photo");
 		
 		RequestDTO params = new RequestDTO();

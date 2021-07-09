@@ -16,4 +16,5 @@ public interface PhotoDetailRepository extends JpaRepository<PhotoDetail,String>
 	
 	List<PhotoDetail> findAllByUserId(String userId);
 	
+	PhotoDetail findOneByTitle (String title);
 }

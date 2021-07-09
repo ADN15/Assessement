@@ -86,7 +86,17 @@ public class FlickrApplicationService {
         return clientHttpRequestFactory;
     }
 	
-	public Map<String, Object> getList (RequestDTO params) throws GlobalCustomException {
+	public PhotoDetail getDataLocal (RequestDTO params) throws GlobalCustomException { 
+		PhotoDetail result = new PhotoDetail();
+		try {
+			result = photoDetailRepository.findOneByTitle(params.getSearch().toUpperCase());
+		}catch (Exception e) {
+			throw new GlobalCustomException("Failed get data Photo on Local "+e.getMessage());
+		}
+		return result;
+	}
+	
+	public Map<String, Object> getDataFlickr (RequestDTO params) throws GlobalCustomException {
 		Map<String,Object> result = new HashMap<String,Object>();
 		RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
 		String url = urlFlicker;
@@ -122,7 +132,7 @@ public class FlickrApplicationService {
 			PhotoDetail metadata = new PhotoDetail();
 			metadata.setUserId(params.getPhotos().getPhoto().get(i).getOwner());
 			metadata.setServerId(params.getPhotos().getPhoto().get(i).getServer());
-			metadata.setTitle(params.getPhotos().getPhoto().get(i).getTitle());
+			metadata.setTitle(params.getPhotos().getPhoto().get(i).getTitle().toUpperCase());
 			photoDetailRepository.save(metadata);
 		}
 		
